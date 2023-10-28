@@ -2,15 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using Cysharp.Threading.Tasks; 
 using Immersal;
 using Immersal.REST;
 
 public class GetCameraPose : MonoBehaviour
 {
-    SDKLoginRequest loginRequest = new SDKLoginRequest();
-    
-    IEnumerator LoginRoutine() 
+    SDKLoginResult loginResult;
+    async UniTask LoginRoutine() 
     {
+        SDKLoginRequest loginRequest = new SDKLoginRequest();
         loginRequest.login = System.Environment.GetEnvironmentVariable("email", System.EnvironmentVariableTarget.User);
         loginRequest.password = System.Environment.GetEnvironmentVariable("email_password", System.EnvironmentVariableTarget.User);
 
@@ -21,9 +22,9 @@ public class GetCameraPose : MonoBehaviour
             request.useHttpContinue = false;
             request.SetRequestHeader("Content-Type", "application/json");
             request.SetRequestHeader("Accept", "application/json");
-            yield return request.SendWebRequest();
+            await request.SendWebRequest();
 
-            SDKLoginResult loginResult = JsonUtility.FromJson<SDKLoginResult>(request.downloadHandler.text);
+            loginResult = JsonUtility.FromJson<SDKLoginResult>(request.downloadHandler.text);
             if (loginResult.error == "none")
             {
                 Debug.Log(loginResult.token);
@@ -31,8 +32,8 @@ public class GetCameraPose : MonoBehaviour
         }
     }
 
-    void Start()
+    async void Start()
     {
-        StartCoroutine(LoginRoutine());
+        await LoginRoutine();
     }
 }
